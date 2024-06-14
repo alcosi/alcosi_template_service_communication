@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+option csharp_namespace = "Alcosi.Documents.gRPC";
+
+package Alcosi.Documents;
+
+service DocumentService {
+
+  /* Request to generate a file */
+  rpc GenerateDocument (GenerateDocumentRequest) returns (GenerateDocumentReply);
+
+}
+
+/* Request to generate a file */
+message GenerateDocumentRequest {
+
+  enum DocumentType {
+    PDF   = 0;
+    XLSX  = 1;
+    DOCX  = 2;
+    HTML  = 3;
+    TEXT  = 4;
+    CSV   = 5;
+  }
+
+  enum Engine {
+    JsReport  = 0;
+    EPPlus    = 1;
+    Word      = 2;
+    Razor     = 3;
+  }
+
+  string template_id = 1;                                 // Template ID
+  DocumentType document_type = 2;                         // Document type (PDF, XLSX, etc.)
+  string lang = 3;                                        // Language of the document
+  string data = 4;                                        // Document data (json string)
+  Engine engine = 5;
+}
+
+/* Result of the request to generate a file */
+message GenerateDocumentReply {
+  bytes document = 1;                                     // Generated document
+}

@@ -164,7 +164,10 @@ tasks.test {
 kotlin {
     jvmToolchain(21)
 }
-
+tasks.getByName<Jar>("jar") {
+    enabled = true
+    archiveClassifier = ""
+}
 tasks.named("generateLicenseReport") {
     outputs.upToDateWhen { false }
 }

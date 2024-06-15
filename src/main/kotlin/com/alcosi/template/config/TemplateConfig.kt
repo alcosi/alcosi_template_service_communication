@@ -4,8 +4,9 @@ import Alcosi.Documents.DocumentServiceClient
 import Alcosi.Documents.GrpcDocumentServiceClient
 import com.alcosi.lib.logging.http.okhttp.OKLoggingInterceptor
 import com.alcosi.template.dto.request.AbstractTemplateRequest
-import com.alcosi.template.dto.request.AnyTemplateRequest
-import com.alcosi.template.dto.request.MapTemplateRequest
+import com.alcosi.template.service.ExternalTemplateService
+import com.alcosi.template.service.TemplateService
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.squareup.wire.GrpcClient
 import io.github.breninsul.namedlimitedvirtualthreadexecutor.service.VirtualNamedLimitedExecutorService
 import okhttp3.Interceptor
@@ -22,11 +23,12 @@ import java.nio.charset.Charset
 import java.util.concurrent.ExecutorService
 
 @Configuration
-@ConditionalOnProperty(prefix = "template-service", value = ["enabled"], havingValue = "true", matchIfMissing = false)
+@ConditionalOnProperty(prefix = "template-service", value = ["enabled"], havingValue = "true", matchIfMissing = true)
 @EnableConfigurationProperties(TemplateProperties::class)
 open class TemplateConfig {
-    @Bean("templateGrpcClient")
-    @ConditionalOnMissingBean(name = ["templateGrpcClient"])
+
+    @Bean("alcosiTemplateGrpcClient")
+    @ConditionalOnMissingBean(name = ["alcosiTemplateGrpcClient"])
     open fun getTemplateGrpcClient(properties: TemplateProperties): GrpcClient {
         val interceptors = mutableListOf<Interceptor>()
         if (!properties.loggingDisabled) {
@@ -43,18 +45,27 @@ open class TemplateConfig {
         AbstractTemplateRequest.defaultServiceResponseCharset = Charset.forName(properties.defaultServiceResponseCharset)
     }
 
-    @Bean
+    @Bean("alcosiDocumentServiceClient")
     @ConditionalOnMissingBean(DocumentServiceClient::class)
     open fun getDocumentServiceClient(
-        @Qualifier("templateGrpcClient") client: GrpcClient,
+        @Qualifier("alcosiTemplateGrpcClient") client: GrpcClient,
     ): DocumentServiceClient {
         return GrpcDocumentServiceClient(client)
     }
+    @Bean("alcosiDocumentTemplateServiceClient")
+    @ConditionalOnMissingBean(TemplateService::class)
+    open fun getDocumentTemplateServiceClient(
+        @Qualifier("alcosiDocumentServiceClient") client: DocumentServiceClient,
+        objectMapper: ObjectMapper,
+        @Qualifier("asyncAlcosiTemplateExecutorService") executorService: ExecutorService,
+        properties: TemplateProperties
 
-    @Bean("asyncTemplateExecutorService")
-    @ConditionalOnMissingBean(name = ["asyncTemplateExecutorService"])
+    ): TemplateService {
+        return ExternalTemplateService(client,objectMapper,executorService,properties.maxParallelRequests)
+    }
+    @Bean("asyncAlcosiTemplateExecutorService")
+    @ConditionalOnMissingBean(name = ["asyncAlcosiTemplateExecutorService"])
     open fun getAsyncTemplateExecutorService(
-        @Qualifier("templateGrpcClient") client: GrpcClient,
     ): ExecutorService {
         return VirtualNamedLimitedExecutorService("async-template-executor")
     }

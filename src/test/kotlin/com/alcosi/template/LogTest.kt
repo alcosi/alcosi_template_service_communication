@@ -7,7 +7,7 @@ import com.alcosi.template.service.TemplateService
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.junit.jupiter.api.Test
 
-class HashTest {
+class LogTest {
     val service: TemplateService
 
     init {

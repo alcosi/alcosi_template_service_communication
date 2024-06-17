@@ -143,6 +143,7 @@ dependencies {
     kapt("org.apache.logging.log4j:log4j-core")
     kapt("org.springframework.boot:spring-boot-autoconfigure-processor")
     kapt("org.springframework.boot:spring-boot-configuration-processor")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 configure<SourceSetContainer> {
     named("main") {

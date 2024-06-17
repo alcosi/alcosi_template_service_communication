@@ -32,7 +32,7 @@ open class TemplateConfig {
     open fun getTemplateGrpcClient(properties: TemplateProperties): GrpcClient {
         val interceptors = mutableListOf<Interceptor>()
         if (!properties.loggingDisabled) {
-            interceptors.add(OKLoggingInterceptor(properties.maxLogBodySize, properties.loggingLevel.javaLevel, 1))
+            interceptors.add(OKLoggingInterceptor(properties.maxLogBodySize, properties.protocolLoggingLevel.javaLevel, 1))
         }
         return createClient(properties, interceptors)
     }
@@ -61,7 +61,7 @@ open class TemplateConfig {
         properties: TemplateProperties
 
     ): TemplateService {
-        return ExternalTemplateService(client,objectMapper,executorService,properties.maxParallelRequests)
+        return ExternalTemplateService(client,objectMapper,executorService,properties.maxParallelRequests,properties.serviceLoggingLevel.javaLevel)
     }
     @Bean("asyncAlcosiTemplateExecutorService")
     @ConditionalOnMissingBean(name = ["asyncAlcosiTemplateExecutorService"])

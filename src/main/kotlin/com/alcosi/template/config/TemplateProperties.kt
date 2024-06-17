@@ -14,7 +14,7 @@ import java.time.Duration
  * @property uri The URI of the Template service.
  * @property protocol The protocol to be used for communication with the Template service.
  * @property maxParallelRequests The maximum number of parallel requests to the Template service.
- * @property loggingLevel The logging level for the Template service.
+ * @property protocolLoggingLevel The logging level for the Template service.
  * @property loggingDisabled Flag indicating if logging is disabled for the Template service.
  * @property maxLogBodySize The maximum size of the log body for the Template service.
  * @property connectTimeout The connect timeout for communicating with the Template service.
@@ -31,7 +31,8 @@ open class TemplateProperties(
     var uri: String = "http://127.0.0.1:1234",
     var protocol: OkHttpProtocol = OkHttpProtocol.H2_PRIOR_KNOWLEDGE,
     var maxParallelRequests:Int = 10,
-    var loggingLevel: JavaLoggingLevel = JavaLoggingLevel.INFO,
+    var protocolLoggingLevel: JavaLoggingLevel = JavaLoggingLevel.FINEST,
+    var serviceLoggingLevel: JavaLoggingLevel = JavaLoggingLevel.INFO,
     var loggingDisabled: Boolean = false,
     var maxLogBodySize: Int = 10000,
     var connectTimeout: Duration = Duration.ofSeconds(10),

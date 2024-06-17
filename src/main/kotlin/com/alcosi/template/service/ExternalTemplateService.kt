@@ -9,29 +9,36 @@ import com.alcosi.template.exception.TemplateException
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.breninsul.javatimerscheduler.sync
 import kotlinx.coroutines.runBlocking
-import org.apache.logging.log4j.kotlin.Logging
 import java.nio.charset.Charset
 import java.util.concurrent.Callable
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Semaphore
+import java.util.logging.Level
+import java.util.logging.Logger
 
 /**
- * This class represents an external template service that implements the TemplateService interface.
+ * This class represents an external template service that implements the
+ * TemplateService interface.
  *
  * @property client the DocumentServiceClient used to generate documents
  * @property objectMapper the ObjectMapper used to serialize data
  * @property asyncExecutor the ExecutorService used for async operations
- * @property maxParallelProcesses the maximum number of parallel processes allowed
- * @property semaphore a semaphore used to limit the parallel processes (null if maxParallelProcesses <= 0)
+ * @property maxParallelProcesses the maximum number of parallel processes
+ *     allowed
+ * @property semaphore a semaphore used to limit the parallel processes
+ *     (null if maxParallelProcesses <= 0)
  */
 open class ExternalTemplateService(
     protected open val client: DocumentServiceClient,
     protected open val objectMapper: ObjectMapper,
     protected open val asyncExecutor: ExecutorService,
-    maxParallelProcesses: Int
-) : Logging, TemplateService {
-    protected open val semaphore: Semaphore? =if (maxParallelProcesses>0) Semaphore(maxParallelProcesses) else null
+    maxParallelProcesses: Int,
+    val loggingLevel: Level
+) : TemplateService {
+    protected open val logger: Logger = Logger.getLogger(this.javaClass.name)
+
+    protected open val semaphore: Semaphore? = if (maxParallelProcesses > 0) Semaphore(maxParallelProcesses) else null
 
     /**
      * Synchronizes the execution of a callable if the semaphore exists.
@@ -39,13 +46,13 @@ open class ExternalTemplateService(
      * @param call the callable to be executed
      * @return the result of the callable's execution
      */
-     protected open fun <T> Semaphore?.syncIfExist(call:Callable<T>):T{
-         return if (this==null){
-             call.call()
-         } else{
-             this.sync(call)
-         }
-     }
+    protected open fun <T> Semaphore?.syncIfExist(call: Callable<T>): T {
+        return if (this == null) {
+            call.call()
+        } else {
+            this.sync(call)
+        }
+    }
 
     /**
      * Sends a template request and returns the response as a string.
@@ -65,7 +72,8 @@ open class ExternalTemplateService(
     }
 
     /**
-     * Sends a template request asynchronously and returns a CompletableFuture that completes with the response as a string.
+     * Sends a template request asynchronously and returns a CompletableFuture
+     * that completes with the response as a string.
      *
      * @param request the template request to send
      * @return a CompletableFuture that completes with the response as a string
@@ -89,50 +97,91 @@ open class ExternalTemplateService(
     /**
      * Returns the content of the generated document as a string.
      *
-     * @param generateDocumentReply the GenerateDocumentReply object containing the generated document
+     * @param generateDocumentReply the GenerateDocumentReply object containing
+     *     the generated document
      * @param charset the charset used to decode the document string
      * @return the content of the generated document as a string
      */
     protected open fun getContent(
         generateDocumentReply: GenerateDocumentReply,
         charset: Charset
-    ):String{
-        return generateDocumentReply.document.string(charset)
+    ): String {
+        val content= generateDocumentReply.document.string(charset)
+        logger.log(loggingLevel,constructRsBody(content))
+        return content
     }
 
     /**
      * Creates a [GenerateDocumentRequest] based on the given [request].
      *
-     * @param request the template request to create the GenerateDocumentRequest from
+     * @param request the template request to create the
+     *     GenerateDocumentRequest from
      * @return a GenerateDocumentRequest object
      */
-    protected open fun <T : Any> createRequest(request: AbstractTemplateRequest<T>) =
-        GenerateDocumentRequest(
+    protected open fun <T : Any> createRequest(request: AbstractTemplateRequest<T>): GenerateDocumentRequest {
+        val rq = GenerateDocumentRequest(
             template_id = request.templateName,
             document_type = request.documentType.grpcType,
             lang = request.documentLanguage,
             data_ = serializeData(request.templateParameters),
             engine = request.engine.grpcType
         )
+        logger.log(loggingLevel, constructRqBody(rq))
+        return rq
+    }
 
     /**
-     * Processes the given exception and returns a formatted string representation of the exception.
+     * Constructs the request body for the given GenerateDocumentRequest.
+     *
+     * @param body the GenerateDocumentRequest object to construct the request
+     *     body from
+     * @return the constructed request body as a string
+     */
+    protected open fun constructRqBody(
+        body: GenerateDocumentRequest,
+    ): String {
+        val logString =
+            """
+            ===========================CLIENT GRPC Template request begin===========================
+            =Body         : ${objectMapper.serialize(body)}
+            ===========================CLIENT GRPC Template request end   ==========================
+            """.trimIndent()
+        return logString
+    }
+
+    protected open fun constructRsBody(
+        body: String,
+    ): String {
+        val logString =
+            """
+            ===========================CLIENT GRPC Template response begin===========================
+            =Body         : $body
+            ===========================CLIENT GRPC Template response end   ==========================
+            """.trimIndent()
+        return logString
+    }
+
+    /**
+     * Processes the given exception and returns a formatted string
+     * representation of the exception.
      *
      * @param t the exception to be processed
      * @return a formatted string representation of the exception
      * @throws TemplateException if an exception occurs during the processing
      */
     protected open fun processException(t: Throwable): String {
-        logger.error("Exception Template service:", t)
+        logger.log(java.util.logging.Level.SEVERE, "Exception Template service:", t)
         throw TemplateException(exception = t)
     }
 
     /**
-     * Serializes the given data into a string representation using the objectMapper.
+     * Serializes the given data into a string representation using the
+     * objectMapper.
      *
      * @param params the data to be serialized
      * @return the serialized data as a string
      * @throws NullPointerException if the serialization process returns null
      */
     protected open fun serializeData(params: Any) = objectMapper.serialize(params)!!
+
 }

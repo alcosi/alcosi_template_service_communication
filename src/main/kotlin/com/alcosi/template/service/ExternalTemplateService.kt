@@ -144,7 +144,7 @@ open class ExternalTemplateService(
             =Body         :${if (logBody)objectMapper.writeValueAsString(body) else "hidden"}
             =Body size    :${body.data_.length}
             =Body hash    :${body.data_.hashCode()}
-            ===========================CLIENT GRPC Template request end   ==========================
+            ===========================CLIENT GRPC Template request end  ==========================
             """.trimIndent()
         return logString
     }
@@ -158,7 +158,7 @@ open class ExternalTemplateService(
             =Body         : ${if (logBody)body else "hidden"}
             =Body size    :${body.length}
             =Body hash    :${body.hashCode()}
-            ===========================CLIENT GRPC Template response end   ==========================
+            ===========================CLIENT GRPC Template response end  ==========================
             """.trimIndent()
         return logString
     }

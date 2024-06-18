@@ -1,29 +1,29 @@
 package com.alcosi.template.config
 
-import com.alcosi.lib.logging.JavaLoggingLevel
 import com.alcosi.template.dto.TemplateDocumentType
 import com.alcosi.template.dto.TemplateEngine
+import io.github.breninsul.okhttp.logging.JavaLoggingLevel
+import io.github.breninsul.okhttp.logging.OkHttpLoggerProperties
 import okhttp3.Protocol
 import org.springframework.boot.context.properties.ConfigurationProperties
 import java.time.Duration
 
 /**
- * Configuration properties for the Template service.
+ * The `TemplateProperties` class represents the configuration properties for the template service.
  *
- * @property enabled Flag indicating if the Template service is enabled.
- * @property uri The URI of the Template service.
- * @property protocol The protocol to be used for communication with the Template service.
- * @property maxParallelRequests The maximum number of parallel requests to the Template service.
- * @property protocolLoggingLevel The logging level for the Template service.
- * @property loggingDisabled Flag indicating if logging is disabled for the Template service.
- * @property maxLogBodySize The maximum size of the log body for the Template service.
- * @property connectTimeout The connect timeout for communicating with the Template service.
- * @property readTimeout The read timeout for communicating with the Template service.
- * @property writeTimeout The write timeout for communicating with the Template service.
- * @property defaultDocumentLanguage The default document language for the Template service.
- * @property defaultDocumentType The default document type for the Template service.
- * @property defaultEngine The default template engine for the Template service.
- * @property defaultServiceResponseCharset The default character set for the Template service response.
+ * @property enabled Indicates whether the template service is enabled.
+ * @property uri The URI of the template service.
+ * @property protocol The protocol to be used by the template service.
+ * @property maxParallelRequests The maximum number of parallel requests allowed.
+ * @property serviceLoggingLevel The logging level for the template service.
+ * @property protocolLogging The logging settings for the protocol.
+ * @property connectTimeout The connection timeout duration.
+ * @property readTimeout The read timeout duration.
+ * @property writeTimeout The write timeout duration.
+ * @property defaultDocumentLanguage The default language for the template documents.
+ * @property defaultDocumentType The default type for the template documents.
+ * @property defaultEngine The default engine for the template service.
+ * @property defaultServiceResponseCharset The default charset for the service response.
  */
 @ConfigurationProperties(prefix = "template-service")
 open class TemplateProperties(
@@ -31,10 +31,11 @@ open class TemplateProperties(
     var uri: String = "http://127.0.0.1:1234",
     var protocol: OkHttpProtocol = OkHttpProtocol.H2_PRIOR_KNOWLEDGE,
     var maxParallelRequests:Int = 10,
-    var protocolLoggingLevel: JavaLoggingLevel = JavaLoggingLevel.FINEST,
     var serviceLoggingLevel: JavaLoggingLevel = JavaLoggingLevel.INFO,
-    var loggingDisabled: Boolean = false,
-    var maxLogBodySize: Int = 10000,
+    var protocolLogging: OkHttpLoggerProperties=OkHttpLoggerProperties(
+        request = OkHttpLoggerProperties.LogSettings(bodyIncluded = false, tookTimeIncluded = false),
+        response = OkHttpLoggerProperties.LogSettings(bodyIncluded = false, tookTimeIncluded = false)
+    ),
     var connectTimeout: Duration = Duration.ofSeconds(10),
     var readTimeout: Duration = Duration.ofSeconds(120),
     var writeTimeout: Duration = Duration.ofSeconds(120),

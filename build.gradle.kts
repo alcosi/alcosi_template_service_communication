@@ -14,6 +14,7 @@ plugins {
     val kotlinVersion = "2.0.0"
     id("idea")
     id("org.jetbrains.kotlin.plugin.allopen") version "2.0.0"
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.0.0"
     id("com.bmuschko.docker-remote-api") version "9.4.0"
     id("org.springframework.boot") version "3.3.0"
     id("io.spring.dependency-management") version "1.1.5"
@@ -36,9 +37,9 @@ val gitToken = "${System.getenv()["GIHUB_PACKAGE_TOKEN"] ?: System.getenv()["GIT
 
 
 val javaVersion = JavaVersion.VERSION_21
-val env = "DEV"
+val env = "RELEASE"
 
-group = "com.alcosi.nft"
+group = "com.alcosi"
 version = "1.0-$env"
 java.sourceCompatibility = javaVersion
 
@@ -135,11 +136,15 @@ configurations {
 
 
 dependencies {
-    api("com.alcosi:commons-library-basic-dependency:3.3.0.4.0.8")
-//    api("org.eclipse.jetty.http2:http2-server:11.0.21")
-//    api("jakarta.servlet:jakarta.servlet-api:5.0.0")
+    compileOnly("org.springframework.boot:spring-boot-starter:3.0.0")
+    api("io.github.breninsul:okhttp-logging-interceptor:1.0.0")
     api("com.squareup.okhttp3:okhttp:4.12.0")
     api("com.squareup.wire:wire-grpc-client:4.9.9")
+    api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+    api("io.github.breninsul:named-limited-virtual-thread-executor:1.0.0")
+    api("com.fasterxml.jackson.core:jackson-databind:2.17.1")
+    api("com.fasterxml.jackson.module:jackson-module-kotlin:2.17.1")
+    api("io.github.breninsul:java-timer-scheduler-starter:1.0.3")
     kapt("org.apache.logging.log4j:log4j-core")
     kapt("org.springframework.boot:spring-boot-autoconfigure-processor")
     kapt("org.springframework.boot:spring-boot-configuration-processor")

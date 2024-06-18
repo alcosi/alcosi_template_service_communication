@@ -3,7 +3,6 @@ package com.alcosi.template.service
 import Alcosi.Documents.DocumentServiceClient
 import Alcosi.Documents.GenerateDocumentReply
 import Alcosi.Documents.GenerateDocumentRequest
-import com.alcosi.lib.objectMapper.serialize
 import com.alcosi.template.dto.request.AbstractTemplateRequest
 import com.alcosi.template.exception.TemplateException
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -24,10 +23,9 @@ import java.util.logging.Logger
  * @property client the DocumentServiceClient used to generate documents
  * @property objectMapper the ObjectMapper used to serialize data
  * @property asyncExecutor the ExecutorService used for async operations
- * @property maxParallelProcesses the maximum number of parallel processes
- *     allowed
- * @property semaphore a semaphore used to limit the parallel processes
- *     (null if maxParallelProcesses <= 0)
+ * @property maxParallelProcesses the maximum number of parallel processes allowed
+ * @property loggingLevel service layer logging level
+ * @property semaphore a semaphore used to limit the parallel processes (null if maxParallelProcesses <= 0)
  */
 open class ExternalTemplateService(
     protected open val client: DocumentServiceClient,
@@ -37,7 +35,6 @@ open class ExternalTemplateService(
     val loggingLevel: Level
 ) : TemplateService {
     protected open val logger: Logger = Logger.getLogger(this.javaClass.name)
-
     protected open val semaphore: Semaphore? = if (maxParallelProcesses > 0) Semaphore(maxParallelProcesses) else null
 
     /**
@@ -143,7 +140,7 @@ open class ExternalTemplateService(
         val logString =
             """
             ===========================CLIENT GRPC Template request begin===========================
-            =Body         : ${objectMapper.serialize(body)}
+            =Body         : ${objectMapper.writeValueAsString(body)}
             ===========================CLIENT GRPC Template request end   ==========================
             """.trimIndent()
         return logString
@@ -182,6 +179,6 @@ open class ExternalTemplateService(
      * @return the serialized data as a string
      * @throws NullPointerException if the serialization process returns null
      */
-    protected open fun serializeData(params: Any) = objectMapper.serialize(params)!!
+    protected open fun serializeData(params: Any) = objectMapper.writeValueAsString(params)!!
 
 }

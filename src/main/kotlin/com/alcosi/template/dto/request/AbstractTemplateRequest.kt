@@ -21,7 +21,7 @@ open class AbstractTemplateRequest<T> (
     open val documentType: TemplateDocumentType = defaultDocumentType,
     open val documentLanguage:String= defaultDocumentLanguage,
     open val engine: TemplateEngine = defaultEngine,
-    open val responseCharset:Charset = defaultServiceResponseCharset
+    open val responseCharset: Charset = defaultServiceResponseCharset
 ){
     companion object{
         /**

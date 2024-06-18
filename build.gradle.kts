@@ -1,7 +1,5 @@
 import com.alcosi.gradle.dependency.group.JsonGroupedGenerator
 import com.alcosi.gradle.dependency.group.MDGroupedGenerator
-import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
-import com.bmuschko.gradle.docker.tasks.image.DockerPushImage
 import com.github.jk1.license.LicenseReportExtension
 
 /** This plugin is only used to generate DEPENDENCIES.md file */
@@ -15,7 +13,6 @@ plugins {
     id("idea")
     id("org.jetbrains.kotlin.plugin.allopen") version "2.0.0"
     id("org.jetbrains.kotlin.plugin.serialization") version "2.0.0"
-    id("com.bmuschko.docker-remote-api") version "9.4.0"
     id("org.springframework.boot") version "3.3.0"
     id("io.spring.dependency-management") version "1.1.5"
     id("java-library")
@@ -195,103 +192,6 @@ tasks.named("generateLicenseReport") {
             ),
         )
  }
-
-val dockerUsername = System.getenv()["DOCKER_XRT_USERNAME"] ?: System.getenv()["CI_REGISTRY_USER"]
-val dockerPass = System.getenv()["DOCKER_XRT_PASSWORD"] ?: System.getenv()["CI_JOB_TOKEN"]
-val dockerRegistry = (System.getenv()["DOCKER_XRT_REGISTRY"] ?: System.getenv()["CI_REGISTRY"]) ?: "harbor.alcosi.com"
-val dockerProjectNamespace = (System.getenv()["DOCKER_XRT_PROJECT_NAMESPACE"] ?: System.getenv()["CI_PROJECT_NAMESPACE"]) ?: "nft"
-val dockerProjectName = (System.getenv()["DOCKER_XRT_PROJECT_NAME"] ?: System.getenv()["CI_PROJECT_NAME"]) ?: "nft-subscription"
-val dockerHubProject = System.getenv()["DOCKER_XRT_PROJECT"] ?: "$dockerProjectNamespace/$dockerProjectName/"
-
-
-val appName = project.name
-val imageVersion = project.version
-
-val dockerBuildDir = "build/docker/"
-val uniqueContainerName = "$dockerRegistry/$dockerHubProject$appName:$imageVersion"
-val uniqueContainerNameArm = "${uniqueContainerName}_arm"
-val uniqueContainerNameX86 = "${uniqueContainerName}_x86"
-
-
-
-
-docker {
-    registryCredentials {
-        url.set("https://$dockerRegistry/")
-        username.set(dockerUsername)
-        password.set(dockerPass)
-    }
-}
-
-tasks.create("createDockerfile", com.bmuschko.gradle.docker.tasks.image.Dockerfile::class) {
-    dependsOn("bootJar")
-    destFile.set(project.file("$dockerBuildDir/Dockerfile"))
-    from("amazoncorretto:21.0.3-alpine3.19")
-    runCommand("mkdir /opt/app && mkdir /opt/app/logs")
-    addFile("${project.name}-$version.jar", "/opt/app/app.jar")
-    entryPoint("java")
-    defaultCommand(
-        "-jar",
-        "--add-opens=java.base/java.lang.reflect=ALL-UNNAMED",
-        "-Dapp.home=/opt/app/",
-        "/opt/app/app.jar",
-    )
-}
-
-tasks.create<Copy>("copyJarToDockerBuildDir") {
-    dependsOn("createDockerfile")
-    from("build/libs")
-    into(dockerBuildDir)
-    include("*.jar")
-    doLast {
-        println("copy File end")
-    }
-}
-tasks.create<DockerBuildImage>("buildDockerImageX86") {
-    val buildPlatform = "linux/amd64"
-    val imageName = uniqueContainerNameX86
-    configBuildTask(this, buildPlatform, imageName)
-}
-
-tasks.create<DockerBuildImage>("buildDockerImageArm") {
-    val buildPlatform = "linux/arm64/v8"
-    val imageName = uniqueContainerNameArm
-    configBuildTask(this, buildPlatform, imageName)
-}
-tasks.create<Task>("buildDockerImages") {
-    dependsOn("buildDockerImageArm", "buildDockerImageX86")
-}
-
-tasks.create<DockerPushImage>("pushDockerImageArm") {
-    dependsOn("buildDockerImageArm")
-    images.addAll(listOf(uniqueContainerNameArm))
-    doLast {
-        println("Image pushed: $uniqueContainerNameArm")
-    }
-}
-
-tasks.create<DockerPushImage>("pushDockerImageX86") {
-    dependsOn("buildDockerImageX86")
-    images.addAll(listOf(uniqueContainerNameX86))
-    doLast {
-        println("Image pushed: $uniqueContainerNameX86")
-    }
-}
-
-tasks.create<Task>("pushDockerImage") {
-    dependsOn("pushDockerImageArm", "pushDockerImageX86")
-}
-
-fun configBuildTask(
-    dockerBuildImage: DockerBuildImage,
-    buildPlatform: String,
-    imageName: String,
-) {
-    dockerBuildImage.dependsOn("copyJarToDockerBuildDir")
-    dockerBuildImage.platform.set(buildPlatform)
-    dockerBuildImage.inputDir.set(project.file(dockerBuildDir))
-    dockerBuildImage.images.add(imageName)
-}
 
 
 wire {

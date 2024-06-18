@@ -32,7 +32,8 @@ open class ExternalTemplateService(
     protected open val objectMapper: ObjectMapper,
     protected open val asyncExecutor: ExecutorService,
     maxParallelProcesses: Int,
-    val loggingLevel: Level
+    val loggingLevel: Level,
+    val logBody:Boolean
 ) : TemplateService {
     protected open val logger: Logger = Logger.getLogger(this.javaClass.name)
     protected open val semaphore: Semaphore? = if (maxParallelProcesses > 0) Semaphore(maxParallelProcesses) else null
@@ -140,7 +141,9 @@ open class ExternalTemplateService(
         val logString =
             """
             ===========================CLIENT GRPC Template request begin===========================
-            =Body         : ${objectMapper.writeValueAsString(body)}
+            =Body         :${if (logBody)objectMapper.writeValueAsString(body) else "hidden"}
+            =Body size    :${body.data_.length}
+            =Body hash    :${body.data_.hashCode()}
             ===========================CLIENT GRPC Template request end   ==========================
             """.trimIndent()
         return logString
@@ -152,7 +155,9 @@ open class ExternalTemplateService(
         val logString =
             """
             ===========================CLIENT GRPC Template response begin===========================
-            =Body         : $body
+            =Body         : ${if (logBody)body else "hidden"}
+            =Body size    :${body.length}
+            =Body hash    :${body.hashCode()}
             ===========================CLIENT GRPC Template response end   ==========================
             """.trimIndent()
         return logString

@@ -32,6 +32,7 @@ open class TemplateProperties(
     var protocol: OkHttpProtocol = OkHttpProtocol.H2_PRIOR_KNOWLEDGE,
     var maxParallelRequests:Int = 10,
     var serviceLoggingLevel: JavaLoggingLevel = JavaLoggingLevel.INFO,
+    var serviceLogBody:Boolean = false,
     var protocolLogging: OkHttpLoggerProperties=OkHttpLoggerProperties(
         request = OkHttpLoggerProperties.LogSettings(bodyIncluded = false, tookTimeIncluded = false),
         response = OkHttpLoggerProperties.LogSettings(bodyIncluded = false, tookTimeIncluded = false)

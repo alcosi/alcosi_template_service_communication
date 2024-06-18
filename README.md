@@ -1,6 +1,7 @@
 ### Library for low-level communication with Alcosi (C#) template service with spring boot initialization.
 
 ### Using:
+
 - To use just add as dependency:
 
 ````kotlin
@@ -11,10 +12,11 @@ dependencies {
 }
 
 ````
+
 - Then get service `com.alcosi.template.service.TemplateService` from spring boot context
 
-
-Predefined request types like `MapTemplateRequest`,`DataTemplateRequest`,`AnyTemplateRequest` can be used, or own child for `AbstractTemplateRequest` created depending on template server requirements
+Predefined request types like `MapTemplateRequest`,`DataTemplateRequest`,`AnyTemplateRequest` can be used, or own child
+for `AbstractTemplateRequest` created depending on template server requirements
 
 Then use it
 `service.send(MapTemplateRequest("templateName", mapOf("key" to "val")))`
@@ -28,6 +30,7 @@ Configure with properties:
 | `template-service.protocol`                                     | OkHttpProtocol       | Protocol                                         |
 | `template-service.max-parallel-requests`                        | Int                  | Max parallel requests to template server         |
 | `template-service.service-logging-level`                        | JavaLoggingLevel     | Request/response logging level (service layer)   |
+| `template-service.service-log-body`                             | Boolean              | Log body content or not                          |
 | `template-service.connect-timeout`                              | Duration             | Connect timeout                                  |
 | `template-service.read-timeout`                                 | Duration             | Read timeout                                     |
 | `template-service.write-timeout`                                | Duration             | Write timeout                                    |

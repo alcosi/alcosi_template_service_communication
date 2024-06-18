@@ -37,7 +37,7 @@ val javaVersion = JavaVersion.VERSION_21
 val env = "RELEASE"
 
 group = "com.alcosi"
-version = "1.1-$env"
+version = "1.2-$env"
 java.sourceCompatibility = javaVersion
 
 idea {
@@ -91,20 +91,16 @@ centralPortal {
         packaging = "jar"
         name.set(project.name)
         description.set("""
-The application is a ready API Gateway with implemented features, including:
-- Logging
-- Authorization
-- OpenAPI and Swagger distribution
-- Authentication and authorization with Ethereum wallets, including refresh tokens.           
+Library for low-level communication with Alcosi (C#) template service with spring boot initialization.        
         """)
         val repository = "https://$repo"
         url.set(repository)
-        licenses {
-            license {
-                name.set("Apache 2.0")
-                url.set("http://www.apache.org/licenses/LICENSE-2.0")
-            }
-        }
+//        licenses {
+//            license {
+//                name.set("Apache 2.0")
+//                url.set("http://www.apache.org/licenses/LICENSE-2.0")
+//            }
+//        }
         scm {
             connection.set("scm:$repository.git")
             developerConnection.set("scm:git@$repo.git")

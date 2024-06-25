@@ -13,6 +13,7 @@ import java.util.concurrent.Callable
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Semaphore
+import java.util.function.Supplier
 import java.util.logging.Level
 import java.util.logging.Logger
 
@@ -105,7 +106,7 @@ open class ExternalTemplateService(
         charset: Charset
     ): String {
         val content= generateDocumentReply.document.string(charset)
-        logger.log(loggingLevel,constructRsBody(content))
+        logger.logNotOff(loggingLevel){constructRsBody(content)}
         return content
     }
 
@@ -124,7 +125,7 @@ open class ExternalTemplateService(
             data_ = serializeData(request.templateParameters),
             engine = request.engine.grpcType
         )
-        logger.log(loggingLevel, constructRqBody(rq))
+        logger.logNotOff(loggingLevel) { constructRqBody(rq) }
         return rq
     }
 
@@ -186,4 +187,9 @@ open class ExternalTemplateService(
      */
     protected open fun serializeData(params: Any) = objectMapper.writeValueAsString(params)!!
 
+    open fun Logger.logNotOff(level: Level,supplier: Supplier<String>) {
+        if (level!= Level.OFF){
+            log(level,supplier.get())
+        }
+    }
 }

@@ -13,7 +13,7 @@ plugins {
     id("idea")
     id("org.jetbrains.kotlin.plugin.allopen") version "2.0.0"
     id("org.jetbrains.kotlin.plugin.serialization") version "2.0.0"
-    id("org.springframework.boot") version "3.3.0"
+    id("org.springframework.boot") version "3.3.1"
     id("io.spring.dependency-management") version "1.1.5"
     id("java-library")
     id("maven-publish")
@@ -37,7 +37,7 @@ val javaVersion = JavaVersion.VERSION_21
 val env = "RELEASE"
 
 group = "com.alcosi"
-version = "1.3-$env"
+version = "1.4-$env"
 java.sourceCompatibility = javaVersion
 
 idea {
@@ -129,8 +129,8 @@ configurations {
 
 
 dependencies {
-    compileOnly("org.springframework.boot:spring-boot-starter:3.0.0")
-    api("io.github.breninsul:okhttp-logging-interceptor:1.0.1")
+    compileOnly("org.springframework.boot:spring-boot-starter:3.3.1")
+    api("io.github.breninsul:okhttp-logging-interceptor:1.0.2")
     api("com.squareup.okhttp3:okhttp:4.12.0")
     api("com.squareup.wire:wire-grpc-client:4.9.9")
     api("io.github.breninsul:named-limited-virtual-thread-executor:1.0.0")

@@ -34,7 +34,8 @@ open class ExternalTemplateService(
     protected open val asyncExecutor: ExecutorService,
     maxParallelProcesses: Int,
     val loggingLevel: Level,
-    val logBody:Boolean
+    val logRequestBody: Boolean,
+    val logResponseBody: Boolean,
 ) : TemplateService {
     protected open val logger: Logger = Logger.getLogger(this.javaClass.name)
     protected open val semaphore: Semaphore? = if (maxParallelProcesses > 0) Semaphore(maxParallelProcesses) else null
@@ -45,25 +46,26 @@ open class ExternalTemplateService(
      * @param call the callable to be executed
      * @return the result of the callable's execution
      */
-    protected open fun <T> Semaphore?.syncIfExist(call: Callable<T>): T {
-        return if (this == null) {
+    protected open fun <T> Semaphore?.syncIfExist(call: Callable<T>): T =
+        if (this == null) {
             call.call()
         } else {
             this.sync(call)
         }
-    }
 
     /**
      * Sends a template request and returns the response as a string.
      *
      * @param request the template request to send
-     * @return the response as a string
+     * @param logRequestBody specifies whether to log the request body (default is null)
+     * @param logResponseBody specifies whether to log the response body (default is null)
+     * @return the response content as a string
      */
-    override fun <T : Any> send(request: AbstractTemplateRequest<T>): String {
+    override fun <T : Any> send(request: AbstractTemplateRequest<T>,logRequestBody: Boolean?,logResponseBody: Boolean?): String {
         try {
-            val generateDocumentRequest = createRequest(request)
+            val generateDocumentRequest = createRequest(request,logRequestBody)
             val generateDocumentReply = semaphore.syncIfExist { client.GenerateDocument().executeBlocking(generateDocumentRequest) }
-            val content = getContent(generateDocumentReply, request.responseCharset)
+            val content = getContent(generateDocumentReply, request.responseCharset,logResponseBody)
             return content
         } catch (t: Throwable) {
             return processException(t)
@@ -71,22 +73,24 @@ open class ExternalTemplateService(
     }
 
     /**
-     * Sends a template request asynchronously and returns a CompletableFuture
-     * that completes with the response as a string.
+     * Sends a template request asynchronously and returns the response as a CompletableFuture<String>.
      *
      * @param request the template request to send
-     * @return a CompletableFuture that completes with the response as a string
+     * @param logRequestBody specifies whether to log the request body (default is null)
+     * @param logResponseBody specifies whether to log the response body (default is null)
+     * @return a CompletableFuture that will be completed with the response string
      */
-    override fun <T : Any> sendAsync(request: AbstractTemplateRequest<T>): CompletableFuture<String> {
+    override fun <T : Any> sendAsync(request: AbstractTemplateRequest<T>,logRequestBody: Boolean?,logResponseBody: Boolean?): CompletableFuture<String> {
         try {
-            val generateDocumentRequest = createRequest(request)
-            val content = CompletableFuture.supplyAsync({
-                semaphore.syncIfExist {
-                    runBlocking {
-                        getContent(client.GenerateDocument().execute(generateDocumentRequest), request.responseCharset)
+            val generateDocumentRequest = createRequest(request,logRequestBody)
+            val content =
+                CompletableFuture.supplyAsync({
+                    semaphore.syncIfExist {
+                        runBlocking {
+                            getContent(client.GenerateDocument().execute(generateDocumentRequest), request.responseCharset,logResponseBody)
+                        }
                     }
-                }
-            }, asyncExecutor)
+                }, asyncExecutor)
             return content
         } catch (t: Throwable) {
             return CompletableFuture.completedFuture(processException(t))
@@ -94,38 +98,40 @@ open class ExternalTemplateService(
     }
 
     /**
-     * Returns the content of the generated document as a string.
+     * Retrieves the content from the given GenerateDocumentReply.
      *
-     * @param generateDocumentReply the GenerateDocumentReply object containing
-     *     the generated document
-     * @param charset the charset used to decode the document string
-     * @return the content of the generated document as a string
+     * @param generateDocumentReply the GenerateDocumentReply object containing the document
+     * @param charset the charset used to convert the document to a string
+     * @param logResponseBody specifies whether to log the response body (default is null)
+     * @return the content as a string
      */
     protected open fun getContent(
         generateDocumentReply: GenerateDocumentReply,
-        charset: Charset
+        charset: Charset,
+        logResponseBody: Boolean?
     ): String {
-        val content= generateDocumentReply.document.string(charset)
-        logger.logNotOff(loggingLevel){constructRsBody(content)}
+        val content = generateDocumentReply.document.string(charset)
+        logger.logNotOff(loggingLevel) { constructRsBody(content,logResponseBody) }
         return content
     }
 
     /**
-     * Creates a [GenerateDocumentRequest] based on the given [request].
+     * Creates a GenerateDocumentRequest based on the given AbstractTemplateRequest.
      *
-     * @param request the template request to create the
-     *     GenerateDocumentRequest from
-     * @return a GenerateDocumentRequest object
+     * @param request the template request to create the GenerateDocumentRequest from
+     * @param logRequestBody specifies whether to log the request body (default is null)
+     * @return a GenerateDocumentRequest created from the given template request
      */
-    protected open fun <T : Any> createRequest(request: AbstractTemplateRequest<T>): GenerateDocumentRequest {
-        val rq = GenerateDocumentRequest(
-            template_id = request.templateName,
-            document_type = request.documentType.grpcType,
-            lang = request.documentLanguage,
-            data_ = serializeData(request.templateParameters),
-            engine = request.engine.grpcType
-        )
-        logger.logNotOff(loggingLevel) { constructRqBody(rq) }
+    protected open fun <T : Any> createRequest(request: AbstractTemplateRequest<T>,logRequestBody: Boolean?): GenerateDocumentRequest {
+        val rq =
+            GenerateDocumentRequest(
+                template_id = request.templateName,
+                document_type = request.documentType.grpcType,
+                lang = request.documentLanguage,
+                data_ = serializeData(request.templateParameters),
+                engine = request.engine.grpcType,
+            )
+        logger.logNotOff(loggingLevel) { constructRqBody(rq,logRequestBody) }
         return rq
     }
 
@@ -138,11 +144,12 @@ open class ExternalTemplateService(
      */
     protected open fun constructRqBody(
         body: GenerateDocumentRequest,
+        logRequestBody: Boolean?,
     ): String {
         val logString =
             """
             ===========================CLIENT GRPC Template request begin===========================
-            =Body         :${if (logBody)objectMapper.writeValueAsString(body) else "hidden"}
+            =Body         :${if (logRequestBody ?: this.logRequestBody) objectMapper.writeValueAsString(body) else "hidden"}
             =Body size    :${body.data_.length}
             =Body hash    :${body.data_.hashCode()}
             ===========================CLIENT GRPC Template request end  ==========================
@@ -150,13 +157,11 @@ open class ExternalTemplateService(
         return logString
     }
 
-    protected open fun constructRsBody(
-        body: String,
-    ): String {
+    protected open fun constructRsBody(body: String,logResponseBody: Boolean?): String {
         val logString =
             """
             ===========================CLIENT GRPC Template response begin===========================
-            =Body         : ${if (logBody)body else "hidden"}
+            =Body         : ${if (logResponseBody?:this.logResponseBody) body else "hidden"}
             =Body size    :${body.length}
             =Body hash    :${body.hashCode()}
             ===========================CLIENT GRPC Template response end  ==========================
@@ -187,9 +192,12 @@ open class ExternalTemplateService(
      */
     protected open fun serializeData(params: Any) = objectMapper.writeValueAsString(params)!!
 
-    open fun Logger.logNotOff(level: Level,supplier: Supplier<String>) {
-        if (level!= Level.OFF){
-            log(level,supplier.get())
+    open fun Logger.logNotOff(
+        level: Level,
+        supplier: Supplier<String>,
+    ) {
+        if (level != Level.OFF) {
+            log(level, supplier.get())
         }
     }
 }

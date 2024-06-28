@@ -72,7 +72,7 @@ open class TemplateConfig {
         properties: TemplateProperties
 
     ): TemplateService {
-        return ExternalTemplateService(client, objectMapper, executorService, properties.maxParallelRequests, properties.serviceLoggingLevel.javaLevel,properties.serviceLogBody)
+        return ExternalTemplateService(client, objectMapper, executorService, properties.maxParallelRequests, properties.serviceLoggingLevel.javaLevel,properties.serviceLogRequestBody,properties.serviceLogResponseBody)
     }
 
     @Bean("asyncAlcosiTemplateExecutorService")

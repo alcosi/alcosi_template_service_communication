@@ -11,6 +11,7 @@ import com.squareup.wire.GrpcClient
 import io.github.breninsul.namedlimitedvirtualthreadexecutor.service.VirtualNamedLimitedExecutorService
 import io.github.breninsul.okhttp.logging.JavaLoggingLevel
 import io.github.breninsul.okhttp.logging.OKLoggingInterceptor
+import io.github.breninsul.okhttp.logging.OkHttpLoggerConfiguration
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
@@ -34,7 +35,7 @@ open class TemplateConfig {
     open fun getTemplateGrpcClient(properties: TemplateProperties): GrpcClient {
         val interceptors = mutableListOf<Interceptor>()
         if (properties.protocolLogging.loggingLevel != JavaLoggingLevel.OFF) {
-            interceptors.add(OKLoggingInterceptor(properties.protocolLogging))
+            interceptors.add(OkHttpLoggerConfiguration().registerOKLoggingInterceptor(properties.protocolLogging))
         }
         return createClient(properties, interceptors)
     }

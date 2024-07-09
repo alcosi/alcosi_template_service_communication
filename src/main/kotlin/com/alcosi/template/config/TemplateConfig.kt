@@ -8,9 +8,9 @@ import com.alcosi.template.service.TemplateService
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.squareup.wire.GrpcClient
+import io.github.breninsul.logging.JavaLoggingLevel
 import io.github.breninsul.namedlimitedvirtualthreadexecutor.service.VirtualNamedLimitedExecutorService
-import io.github.breninsul.okhttp.logging.JavaLoggingLevel
-import io.github.breninsul.okhttp.logging.OKLoggingInterceptor
+
 import io.github.breninsul.okhttp.logging.OkHttpLoggerConfiguration
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient

@@ -2,7 +2,8 @@ package com.alcosi.template.config
 
 import com.alcosi.template.dto.TemplateDocumentType
 import com.alcosi.template.dto.TemplateEngine
-import io.github.breninsul.okhttp.logging.JavaLoggingLevel
+import io.github.breninsul.logging.HttpLoggerProperties
+import io.github.breninsul.logging.JavaLoggingLevel
 import io.github.breninsul.okhttp.logging.OkHttpLoggerProperties
 import okhttp3.Protocol
 import org.springframework.boot.context.properties.ConfigurationProperties
@@ -35,8 +36,8 @@ open class TemplateProperties(
     var serviceLogRequestBody: Boolean = true,
     var serviceLogResponseBody: Boolean = true,
     var protocolLogging: OkHttpLoggerProperties=OkHttpLoggerProperties(
-        request = OkHttpLoggerProperties.LogSettings(bodyIncluded = false, tookTimeIncluded = false),
-        response = OkHttpLoggerProperties.LogSettings(bodyIncluded = false, tookTimeIncluded = false)
+        request = HttpLoggerProperties.LogSettings(bodyIncluded = false, tookTimeIncluded = false),
+        response = HttpLoggerProperties.LogSettings(bodyIncluded = false, tookTimeIncluded = false)
     ),
     var connectTimeout: Duration = Duration.ofSeconds(10),
     var readTimeout: Duration = Duration.ofSeconds(120),

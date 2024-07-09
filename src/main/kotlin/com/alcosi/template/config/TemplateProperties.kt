@@ -2,7 +2,7 @@ package com.alcosi.template.config
 
 import com.alcosi.template.dto.TemplateDocumentType
 import com.alcosi.template.dto.TemplateEngine
-import io.github.breninsul.logging.HttpLoggerProperties
+import io.github.breninsul.logging.HttpLogSettings
 import io.github.breninsul.logging.JavaLoggingLevel
 import io.github.breninsul.okhttp.logging.OkHttpLoggerProperties
 import okhttp3.Protocol
@@ -36,8 +36,8 @@ open class TemplateProperties(
     var serviceLogRequestBody: Boolean = true,
     var serviceLogResponseBody: Boolean = true,
     var protocolLogging: OkHttpLoggerProperties=OkHttpLoggerProperties(
-        request = HttpLoggerProperties.LogSettings(bodyIncluded = false, tookTimeIncluded = false),
-        response = HttpLoggerProperties.LogSettings(bodyIncluded = false, tookTimeIncluded = false)
+        request = HttpLogSettings(bodyIncluded = false, tookTimeIncluded = false),
+        response = HttpLogSettings(bodyIncluded = false, tookTimeIncluded = false)
     ),
     var connectTimeout: Duration = Duration.ofSeconds(10),
     var readTimeout: Duration = Duration.ofSeconds(120),

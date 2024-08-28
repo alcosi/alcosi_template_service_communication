@@ -37,7 +37,7 @@ val javaVersion = JavaVersion.VERSION_21
 val env = "RELEASE"
 
 group = "com.alcosi"
-version = "1.18-$env"
+version = "1.19-$env"
 java.sourceCompatibility = javaVersion
 
 idea {
@@ -130,10 +130,10 @@ configurations {
 
 dependencies {
     compileOnly("org.springframework.boot:spring-boot-starter:3.3.2")
-    api("io.github.breninsul:okhttp-logging-interceptor:1.1.5")
+    api("io.github.breninsul:okhttp-logging-interceptor:1.1.6")
     api("com.squareup.okhttp3:okhttp:4.12.0")
     api("com.squareup.wire:wire-grpc-client:4.9.9")
-    api("io.github.breninsul:named-limited-virtual-thread-executor:1.0.1")
+    api("io.github.breninsul:named-limited-virtual-thread-executor:1.0.2")
     api("com.fasterxml.jackson.core:jackson-databind:2.17.1")
     api("com.fasterxml.jackson.module:jackson-module-kotlin:2.17.1")
     api("io.github.breninsul:java-timer-scheduler-starter:1.0.3")

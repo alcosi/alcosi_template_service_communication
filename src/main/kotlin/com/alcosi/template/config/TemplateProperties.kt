@@ -2,8 +2,9 @@ package com.alcosi.template.config
 
 import com.alcosi.template.dto.TemplateDocumentType
 import com.alcosi.template.dto.TemplateEngine
-import io.github.breninsul.logging.HttpLogSettings
-import io.github.breninsul.logging.JavaLoggingLevel
+import io.github.breninsul.logging2.HttpLogSettings
+import io.github.breninsul.logging2.JavaLoggingLevel
+
 import io.github.breninsul.okhttp.logging.OkHttpLoggerProperties
 import okhttp3.Protocol
 import org.springframework.boot.context.properties.ConfigurationProperties

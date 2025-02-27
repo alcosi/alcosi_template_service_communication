@@ -5,7 +5,7 @@ import com.github.jk1.license.LicenseReportExtension
 /** This plugin is only used to generate DEPENDENCIES.md file */
 buildscript {
     dependencies {
-        classpath("com.alcosi:dependency-license-page-generator:1.0.0")
+        classpath("com.alcosi:dependency-license-page-generator:1.0.2")
     }
 }
 plugins {
@@ -13,11 +13,11 @@ plugins {
     id("idea")
     id("org.jetbrains.kotlin.plugin.allopen") version "2.0.0"
     id("org.jetbrains.kotlin.plugin.serialization") version "2.0.0"
-    id("org.springframework.boot") version "3.3.3"
+    id("org.springframework.boot") version "3.4.3"
     id("io.spring.dependency-management") version "1.1.5"
     id("java-library")
     id("maven-publish")
-    id("net.thebugmc.gradle.sonatype-central-portal-publisher") version "1.2.3"
+    id("net.thebugmc.gradle.sonatype-central-portal-publisher") version "1.2.4"
     id("com.github.jk1.dependency-license-report") version "2.8"
     id("org.jetbrains.dokka") version "1.9.20"
     id("org.jetbrains.kotlin.kapt") version kotlinVersion
@@ -37,7 +37,7 @@ val javaVersion = JavaVersion.VERSION_21
 val env = "RELEASE"
 
 group = "com.alcosi"
-version = "1.20-$env"
+version = "2.00-$env"
 java.sourceCompatibility = javaVersion
 
 idea {
@@ -129,14 +129,14 @@ configurations {
 
 
 dependencies {
-    compileOnly("org.springframework.boot:spring-boot-starter:3.3.3")
-    api("io.github.breninsul:okhttp-logging-interceptor:1.2.0")
+    compileOnly("org.springframework.boot:spring-boot-starter:3.4.3")
+    api("io.github.breninsul:okhttp-logging-interceptor:2.0.0")
     api("com.squareup.okhttp3:okhttp:4.12.0")
-    api("com.squareup.wire:wire-grpc-client:4.9.9")
-    api("io.github.breninsul:named-limited-virtual-thread-executor:1.0.2")
+    api("com.squareup.wire:wire-grpc-client:5.3.0")
+    api("io.github.breninsul:named-limited-virtual-thread-executor:1.0.3")
+    api("io.github.breninsul:java-timer-scheduler-starter:1.0.3")
     api("com.fasterxml.jackson.core:jackson-databind:2.17.1")
     api("com.fasterxml.jackson.module:jackson-module-kotlin:2.17.1")
-    api("io.github.breninsul:java-timer-scheduler-starter:1.0.3")
     kapt("org.apache.logging.log4j:log4j-core")
     kapt("org.springframework.boot:spring-boot-autoconfigure-processor")
     kapt("org.springframework.boot:spring-boot-configuration-processor")

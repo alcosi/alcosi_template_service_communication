@@ -28,7 +28,7 @@ repositories {
 ````kotlin
 dependencies {
 //Other dependencies
-    implementation("com.alcosi:alcosi-template-service-communication:2.0.0")
+    implementation("com.alcosi:alcosi-template-service-communication:2.00-RELEASE")
 //Other dependencies
 }
 

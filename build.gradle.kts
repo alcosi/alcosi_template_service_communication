@@ -95,12 +95,12 @@ Library for low-level communication with Alcosi (C#) template service with sprin
         """)
         val repository = "https://$repo"
         url.set(repository)
-//        licenses {
-//            license {
-//                name.set("Apache 2.0")
-//                url.set("http://www.apache.org/licenses/LICENSE-2.0")
-//            }
-//        }
+        licenses {
+            license {
+                name.set("Apache 2.0")
+                url.set("http://www.apache.org/licenses/LICENSE-2.0")
+            }
+        }
         scm {
             connection.set("scm:$repository.git")
             developerConnection.set("scm:git@$repo.git")
